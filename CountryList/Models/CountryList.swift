@@ -7,6 +7,13 @@
 
 import Foundation
 
+enum CountryListData {
+    case initial
+    case loading(Data)
+    case success(Data)
+    case failure(Data)
+}
+
 
 struct CountryList: Decodable {
     let next: String
@@ -14,9 +21,12 @@ struct CountryList: Decodable {
 }
 
 struct Country: Decodable {
-    let name, continent, capital: String
+    let name: String
+    let continent: String
+    let capital: String
     let population: Int
-    let descriptionSmall, countryDescription: String
+    let descriptionSmall: String
+    let description: String
     let image: String
     let countryInfo: CountryInfo
 }
