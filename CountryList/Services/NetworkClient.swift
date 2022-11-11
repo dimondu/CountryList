@@ -22,7 +22,7 @@ final class NetworkManager {
     static let shared = NetworkManager()
     private init() {}
     
-    func fetch<T: Decodable>(_ type: T.Type, for url: String?, completion: @escaping (Result<T, NetworkError>) -> Void) {
+    func fetch<T: Decodable>(_ type: T.Type,  for url: String?, completion: @escaping (Result<T, NetworkError>) -> Void) {
         guard let urlString = url, let url = URL(string: urlString) else {
             completion(.failure(.invalidURL))
             return
@@ -58,6 +58,5 @@ final class NetworkManager {
                     }
                             
                 }
-        
     }
 }

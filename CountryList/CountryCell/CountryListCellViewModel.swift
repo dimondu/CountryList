@@ -40,6 +40,7 @@ final class CountryListCellViewModel: CountryListCellViewModelProtocol {
     
     init(country: Country) {
         self.country = country
+        
     }
     
     func fetchImage() {
