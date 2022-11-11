@@ -14,7 +14,6 @@ enum CountryListData {
     case failure(Data)
 }
 
-
 struct CountryList: Decodable {
     let next: String
     let countries: [Country]

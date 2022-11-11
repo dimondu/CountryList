@@ -17,14 +17,18 @@ final class CountryListViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(CountryListCell.self, forCellReuseIdentifier: "CountryListCell")
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 50
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
     
+    lazy private var refreshControl = UIRefreshControl()
+    
     private var activityIndicator: UIActivityIndicatorView?
     private var viewModel: CountryListViewModelProtocol! {
         didSet {
-            viewModel.fetchCountryList { [weak self] in
+            viewModel.fetchCountryList() { [weak self] in
                 self?.tableView.reloadData()
                 self?.activityIndicator?.stopAnimating()
             }
@@ -36,14 +40,48 @@ final class CountryListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         viewModel = CountryListViewModel()
-        
-        view.backgroundColor = .yellow
         view.addSubview(tableView)
-        tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 50
-
-     
         title = "Countries"
+        
+        tableView.refreshControl = refreshControl
+        refreshControl.addTarget(self, action: #selector(refreshTable), for: .valueChanged)
+        
+        activityIndicator = showActivityIndicator(in: view)
+    }
+    
+    // MARK: - Private methods
+    
+    private func showActivityIndicator(in view: UIView) -> UIActivityIndicatorView {
+        let activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.color = .black
+        activityIndicator.startAnimating()
+        activityIndicator.center = view.center
+        activityIndicator.hidesWhenStopped = true
+
+        view.addSubview(activityIndicator)
+        
+        return activityIndicator
+    }
+    
+    @objc private func refreshTable() {
+        tableView.reloadData()
+        refreshControl.endRefreshing()
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let currentOffset = scrollView.contentOffset.y
+                let maximumOffset = tableView.contentSize.height - scrollView.frame.size.height
+                let deltaOffset = maximumOffset - currentOffset
+                
+        if deltaOffset <= 0 {
+            if viewModel.url != "" {
+                viewModel.fetchCountryList() { [weak self] in
+                    self?.tableView.reloadData()
+                    self?.activityIndicator?.stopAnimating()
+                }
+            }
+            print("refresh")
+        }
     }
 }
 
@@ -51,7 +89,8 @@ final class CountryListViewController: UIViewController {
 
 extension CountryListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        viewModel.numberOfRows()
+        print(viewModel.numberOfRows())
+        return viewModel.numberOfRows()
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
